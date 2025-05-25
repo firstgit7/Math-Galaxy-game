@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Math Galaxy - 100 Level Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(ellipse at center, #0a0f2c 0%, #000000 100%);
+      color: white;
+      overflow: hidden;
+    }
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+    #game-text {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      min-height: 3em;
+    }
+    .start-button, .galaxy-button {
+      font-size: 1.2rem;
+      margin: 1rem;
+      padding: 10px 20px;
+      background-color: #00ffcc;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      min-width: 150px;
+    }
+#gameCanvas {
+  background: rgba(0, 0, 0, 0.2); /* transparent dark glass */
+  border-radius: 12px;
+  margin-top: 20px;
+  display: none;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border: 2px solid rgba(0, 255, 255, 0.3); /* glowing cyan border */
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); /* soft glow */
+
+  color: #00ffff; /* neon cyan text */
+  font-family: 'Orbitron', sans-serif; /* sci-fi font (you’ll need to import it) */
+  padding: 20px;
+}
+
+    #geobot {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 150px;
+      cursor: pointer;
+      display: none;
+    }
+    #geobot-message {
+      position: absolute;
+      bottom: 180px;
+      right: 40px;
+      background: #00ffcc;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: none;
+      max-width: 250px;
+      font-size: 1rem;
+    }
+    #answer-section {
+      margin-top: 20px;
+      display: none;
+    }
+    #answerInput {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 2px solid #00ffcc;
+      color: black;
+      width: 150px;
+      text-align: center;
+    }
+    #submitAnswer {
+      padding: 10px 20px;
+      margin-left: 10px;
+      font-size: 1rem;
+      background-color: #ff0066;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #scoreBoard {
+      margin-top: 15px;
+      font-size: 1.2rem;
+      color: #00ffcc;
+    }
+    #badge {
+      font-size: 1.4rem;
+      color: gold;
+      margin-top: 10px;
+      min-height: 1.5em;
+    }
+    #back-arrow {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 2rem;
+      color: #00ffcc;
+      cursor: pointer;
+      display: none;
+      user-select: none;
+    }
+    #galaxies {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+#animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#rotating-earth {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 120px;
+  animation: spinEarth 15s linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes spinEarth {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Meteors */
+.meteor {
+  position: absolute;
+  width: 80px;
+  height: 20px;
+  background: linear-gradient(90deg, #ff6600, #ffff66);
+  border-radius: 20px;
+  transform: rotate(-45deg);
+  opacity: 0.7;
+  box-shadow: 0 0 15px #ffaa00;
+  animation: flyAcross 8s linear infinite;
+}
+
+.meteor1 {
+  top: -20px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.meteor2 {
+  top: 20%;
+  left: -150px;
+  animation-delay: 3s;
+}
+
+.meteor3 {
+  top: 50%;
+  left: -200px;
+  animation-delay: 6s;
+}
+
+@keyframes flyAcross {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(150vw) translateY(150vh) rotate(-45deg);
+    opacity: 0;
+  }
+}
+#space-scene {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.planet-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin-left: -150px;
+  margin-top: -150px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  animation: rotateOrbit 20s linear infinite;
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+}
+
+.planet.earth {
+  width: 70px;
+  height: 70px;
+  background-image: url('https://bing.com/th/id/BCO.f9577087-e99e-428a-95ad-569ee52b45ae.png');
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.planet.mars {
+  width: 30px;
+  height: 30px;
+  background: #cc4e2e;
+  top: 10%;
+  left: 10%;
+}
+
+.planet.jupiter {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 30% 30%, #d9a066, #a35729);
+  top: 80%;
+  left: 75%;
+}
+
+.planet.saturn {
+  width: 50px;
+  height: 50px;
+  background: #e4c16f;
+  top: 25%;
+  left: 80%;
+  box-shadow: 0 0 0 5px rgba(255,255,255,0.1); /* fake rings */
+}
+
+@keyframes rotateOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+#intro-scene {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #020718, #000000);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 2s ease-out;
+}
+
+#intro-overlay {
+  text-align: center;
+  color: white;
+  max-width: 600px;
+  padding: 30px;
+  background: rgba(0, 0, 50, 0.8);
+  border: 3px solid #00ffcc;
+  border-radius: 20px;
+  animation: zoomIn 1.5s ease-out;
+}
+
+#intro-overlay h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+#intro-overlay p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+#startGameBtn {
+  font-size: 1.4rem;
+  padding: 12px 30px;
+  background-color: #00ffcc;
+  color: black;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffcc;
+  transition: transform 0.3s;
+}
+
+#startGameBtn:hover {
+  transform: scale(1.05);
+  background-color: #00ffaa;
+}
+
+@keyframes zoomIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+#spacecraft {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  transition: transform 3s ease-in, opacity 2s;
+  z-index: 1001;
+}
+
+.lift-off {
+  transform: translateX(-50%) translateY(-150vh);
+  opacity: 0;
+}
+#starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3;
+  background: transparent;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  opacity: 0.8;
+  animation: twinkle 2s infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+
+#login-screen {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #020718, #000000);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#login-form {
+  text-align: center;
+  background: rgba(0, 0, 50, 0.9);
+  border: 2px solid #00ffcc;
+  border-radius: 20px;
+  padding: 40px;
+  color: white;
+}
+
+#login-form input {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 2px solid #00ffcc;
+  width: 250px;
+  margin-bottom: 15px;
+}
+
+#login-form button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  background: #00ffcc;
+  color: black;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#cadet-profile {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: none;
+  cursor: pointer;
+  z-index: 1500;
+}
+
+#cadet-profile img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid #00ffcc;
+}
+
+#profile-popup {
+  display: none;
+  position: absolute;
+  top: 70px;
+  right: 0;
+  background: #111;
+  border: 2px solid #00ffcc;
+  border-radius: 10px;
+  padding: 10px;
+  color: white;
+  text-align: center;
+  z-index: 1501;
+}
+
+#profile-popup p {
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+
+
+#progressContainer {
+  width: 90%;
+  height: 40px;
+  background-color: #222;
+  border: 2px solid #00ffcc;
+  border-radius: 20px;
+  margin-top: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+#progressBar {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+#progressShip {
+  height: 40px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: left 0.6s ease;
+}
+
+#progressFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #00ffcc, #007f7f);
+  border-radius: 20px 0 0 20px;
+  transition: width 0.6s ease;
+  z-index: 0;
+}
+
+
+#progressTarget {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%); /* Slightly outside container for a “goal” effect */
+  height: 80px; /* Adjust size as needed */
+  width:80px;
+  pointer-events: none; /* So clicks go through */
+  z-index: 2; /* On top of fill, behind ship or you can adjust */
+}
+
+
+#progressWrapper {
+  display: flex;
+  align-items: center; /* Vertically center planet and bar */
+  width: 90%;
+  margin: 30px auto;
+  gap: 16px;            /* Spacing between bar and target */
+  position: relative;
+}
+
+#progressTarget {
+  height: 60px;
+  margin:-15px;
+  margin-left:190px;
+  width: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transform: translateY(2px); /* Fine-tune vertical alignment */
+}
+
+
+#progressContainer {
+  flex-grow: 1;
+  height: 40px;
+  background-color: #222;
+  border: 2px solid #00ffcc;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+
+
+  </style>
+</head>
+<body>
+<div id="login-screen">
+  <div id="login-form">
+    <h2>🧑‍🚀 Cadet Login</h2>
+    <input type="text" id="cadetName" placeholder="Enter your name..." />
+    <button id="loginBtn">Login</button>
+  </div>
+</div>
+
+<div id="cadet-profile" title="Click to view profile">
+  <img src="https://png.pngtree.com/png-clipart/20240120/original/pngtree-happy-boy-cartoon-png-image_14139434.png" alt="Cadet" />
+  <div id="profile-popup">
+    <p id="cadetDisplayName"></p>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<audio id="click-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
+
+<div id="intro-scene">
+  <div id="intro-overlay">
+    <h1>🚀 Welcome, Space Cadet!</h1>
+    <p id="intro-text">
+      The Math Galaxy is in trouble! Planets are losing their shine because math energy is fading!<br><br>
+      Your mission is to travel through Fractions, Algebra, and Geometry Galaxies and solve math mysteries to restore their light!<br><br>
+      Are you ready to start your adventure?
+    </p>
+    <button id="startGameBtn">Launch Spacecraft</button>
+  </div>
+  <img id="spacecraft" src="https://i.pinimg.com/originals/5e/a6/57/5ea65718da48f1fb50747e185f69740e.gif" alt="Spacecraft" />
+</div>
+
+  <div id="game-container">
+    <div id="back-arrow" title="Back to Galaxies">⬅</div>
+    <h1>🌌Math Galaxy</h1>
+    <p id="game-text">Restore the galaxy by solving math mysteries!</p>
+
+    <div id="galaxies">
+      <button class="galaxy-button" data-galaxy="fractions">Fractions Galaxy</button>
+      <button class="galaxy-button" data-galaxy="algebra">Algebra Galaxy</button>
+      <button class="galaxy-button" data-galaxy="geometry">Geometry Galaxy</button>
+    </div>
+
+    <div id="answer-section">
+      <input type="text" id="answerInput" placeholder="Your answer..." autocomplete="off" />
+      <button id="submitAnswer">Submit</button>
+    </div>
+
+    <div id="scoreBoard">Score: 0</div>
+    <div id="badge"></div>
+<div id="progressWrapper">
+  <div id="progressContainer"> 
+    <div id="progressBar">
+      <div id="progressFill"></div>
+      <img id="progressShip" src="https://cdn.dribbble.com/users/1106715/screenshots/3539000/stationaryspaceman.gif" alt="Ship" / >
+    </div>
+  </div>
+  <img id="progressTarget" src="https://bing.com/th/id/BCO.f9577087-e99e-428a-95ad-569ee52b45ae.png" />
+</div>
+
+
+
+    <canvas id="gameCanvas" width="650" height="300"></canvas>
+  </div>
+<div id="space-scene">
+  <div class="planet-orbit">
+    <div class="planet earth"></div>
+  </div>
+  <div class="planet mars"></div>
+  <div class="planet jupiter"></div>
+  <div class="planet saturn"></div>
+</div>
+<div id="animated-background">
+  <!--<img src="" alt="Rotating Earth" id="rotating-earth" /> -->
+  <div class="meteor meteor1"></div>
+  <div class="meteor meteor2"></div>
+  <div class="meteor meteor3"></div>
+</div>
+
+  <!-- GeoBot -->
+  <img src="https://png.pngtree.com/png-clipart/20240120/original/pngtree-happy-boy-cartoon-png-image_14139434.png" alt="GeoBot" id="geobot" />
+  <div id="geobot-message"></div>
+
+  <audio id="applause" src="https://www.soundjay.com/human/applause-01.mp3" preload="auto"></audio>
+<div id="starfield"></div>
+
+  <script>
+    let currentLevel = 1;
+    let score = 0;
+    let selectedGalaxy = null;
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const gameText = document.getElementById("game-text");
+    const h1 = document.querySelector("h1");
+    const geoBot = document.getElementById("geobot");
+    const geoBotMsg = document.getElementById("geobot-message");
+    const applause = document.getElementById("applause");
+    const answerInput = document.getElementById("answerInput");
+    const answerSection = document.getElementById("answer-section");
+    const scoreBoard = document.getElementById("scoreBoard");
+    const badgeDisplay = document.getElementById("badge");
+    const backArrow = document.getElementById("back-arrow");
+    const galaxiesDiv = document.getElementById("galaxies");
+    const submitAnswerBtn = document.getElementById("submitAnswer");
+
+   const questions = [
+  {
+    category: "geometry",
+    question: "1) How many degrees are in a triangle?",
+    answer: "180",
+    clue: "The three interior angles of any triangle always add up to 180 degrees."
+  },
+  {
+    category: "geometry",
+    question: "2) How many sides does a pentagon have?",
+    answer: "5",
+    clue: "The prefix 'penta-' means five, just like in pentathlon (5 events)."
+  },
+  {
+    category: "geometry",
+    question: "3) How many right angles are in a square?",
+    answer: "4",
+    clue: "A square has four 90-degree angles, one at each corner."
+  },
+  {
+    category: "geometry",
+    question: "4) What is the sum of interior angles of a quadrilateral?",
+    answer: "360",
+    clue: "A quadrilateral can be split into two triangles, each with 180 degrees."
+  },
+  {
+    category: "geometry",
+    question: "5) What’s the longest side in a right triangle?",
+    answer: "Hypotenuse",
+    clue: "The hypotenuse is opposite the 90° angle and always the longest side."
+  },
+  {
+    category: "geometry",
+    question: "6) What is the area of a rectangle with length 8 and width 3?",
+    answer: "24",
+    clue: "Area = length × width → 8 × 3 = 24 square units."
+  },
+  {
+    category: "geometry",
+    question: "7) How many degrees are in a straight angle?",
+    answer: "180",
+    clue: "A straight angle forms a line — exactly half a full circle."
+  },
+  {
+    category: "geometry",
+    question: "8) How many edges does a cube have?",
+    answer: "12",
+    clue: "Each of the 6 faces has 4 edges, but edges are shared, so 6 × 4 ÷ 2 = 12."
+  },
+  {
+    category: "geometry",
+    question: "9) What is the perimeter of a square with side 5?",
+    answer: "20",
+    clue: "Perimeter = 4 × side = 4 × 5 = 20 units."
+  },
+  {
+    category: "geometry",
+    question: "10) Find the area of a triangle with base 6 and height 4.",
+    answer: "12",
+    clue: "Area = 1/2 × base × height → 0.5 × 6 × 4 = 12."
+  },
+  {
+    category: "geometry",
+    question: "11) A triangle with all sides equal is called what?",
+    answer: "Equilateral",
+    clue: "In an equilateral triangle, all sides and all angles are equal (60° each)."
+  },
+  {
+    category: "geometry",
+    question: "12) A triangle with one 90-degree angle is called what?",
+    answer: "Right triangle",
+    clue: "A triangle with one right angle is always called a right triangle."
+  },
+  {
+    category: "geometry",
+    question: "13) How many lines of symmetry does a regular hexagon have?",
+    answer: "6",
+    clue: "A regular hexagon can be folded in half along 6 different lines."
+  },
+  {
+    category: "geometry",
+    question: "14) What shape has all points equidistant from the center?",
+    answer: "Circle",
+    clue: "A circle is defined as the set of all points a fixed distance from the center."
+  },
+  {
+    category: "geometry",
+    question: "15) What is the area of a circle with radius 3?",
+    answer: "28.27",
+    clue: "Area = πr² → π × 3² = π × 9 ≈ 28.27"
+  },
+  {
+    category: "geometry",
+    question: "16) Find the circumference of a circle with radius 7.",
+    answer: "43.98",
+    clue: "Circumference = 2πr → 2 × π × 7 ≈ 43.98"
+  },
+  {
+    category: "geometry",
+    question: "17) How many faces does a cube have?",
+    answer: "6",
+    clue: "Each side of a cube is a square face; there are 6 of them."
+  },
+  {
+    category: "geometry",
+    question: "18) What is the volume of a cube with side length 3?",
+    answer: "27",
+    clue: "Volume = side³ → 3 × 3 × 3 = 27 cubic units."
+  },
+  {
+    category: "geometry",
+    question: "19) What do we call an angle less than 90 degrees?",
+    answer: "Acute angle",
+    clue: "Acute angles are 'sharp' and always less than 90°."
+  },
+  {
+    category: "geometry",
+    question: "20) What’s an angle greater than 90 but less than 180 degrees?",
+    answer: "Obtuse angle",
+    clue: "Obtuse angles are wide angles between 90° and 180°."
+  },
+  {
+    category: "geometry",
+    question: "21) What kind of polygon has 8 sides?",
+    answer: "Octagon",
+    clue: "The prefix 'octa-' means 8, like an octopus has 8 arms."
+  },
+  {
+    category: "geometry",
+    question: "22) What is a line that cuts a shape into two equal halves called?",
+    answer: "Line of symmetry",
+    clue: "A line of symmetry divides a shape into mirror-image halves."
+  },
+  {
+    category: "geometry",
+    question: "23) In coordinate geometry, what is the distance between (0,0) and (3,4)?",
+    answer: "5",
+    clue: "Use the Pythagorean theorem: √(3² + 4²) = √25 = 5."
+  },
+  {
+    category: "geometry",
+    question: "24) A rectangle has length 9 and width 5. What is its area?",
+    answer: "45",
+    clue: "Area = length × width → 9 × 5 = 45 square units."
+  },
+  {
+    category: "geometry",
+    question: "25) What transformation turns a shape around a fixed point?",
+    answer: "Rotation",
+    clue: "Rotation means spinning a shape around a center point without changing its size."
+  },
+
+  {
+    category: "fractions",
+    question: "1) What is 1/2 + 1/4?",
+    answer: "3/4",
+    clue: "Convert to common denominator: 1/2 = 2/4, then 2/4 + 1/4 = 3/4."
+  },
+  {
+    category: "fractions",
+    question: "2) What is 3/4 - 1/2?",
+    answer: "1/4",
+    clue: "Change 1/2 to 2/4. Now 3/4 - 2/4 = 1/4."
+  },
+  {
+    category: "fractions",
+    question: "3) What is 2/3 + 1/3?",
+    answer: "1",
+    clue: "Denominators are the same: 2/3 + 1/3 = 3/3 = 1 whole."
+  },
+  {
+    category: "fractions",
+    question: "4) What is 5/8 + 3/8?",
+    answer: "1",
+    clue: "Same denominator: 5/8 + 3/8 = 8/8 = 1 whole."
+  },
+  {
+    category: "fractions",
+    question: "5) What is 7/10 - 2/10?",
+    answer: "5/10",
+    clue: "Same denominator: 7 - 2 = 5, so answer is 5/10."
+  },
+  {
+    category: "fractions",
+    question: "6) Simplify 6/8",
+    answer: "3/4",
+    clue: "Divide top and bottom by 2: 6 ÷ 2 = 3, 8 ÷ 2 = 4."
+  },
+  {
+    category: "fractions",
+    question: "7) Is 3/4 greater than 2/3?",
+    answer: "Yes",
+    clue: "Convert to common denominator: 3/4 = 9/12, 2/3 = 8/12 → 9 > 8."
+  },
+  {
+    category: "fractions",
+    question: "8) Multiply: 2/3 × 3/4",
+    answer: "1/2",
+    clue: "Multiply tops: 2×3=6, bottoms: 3×4=12 → 6/12 = 1/2 after simplifying."
+  },
+  {
+    category: "fractions",
+    question: "9) Multiply: 5/6 × 2/5",
+    answer: "1/3",
+    clue: "Multiply: 5×2=10, 6×5=30 → 10/30 = 1/3."
+  },
+  {
+    category: "fractions",
+    question: "10) Divide: 1/2 ÷ 1/4",
+    answer: "2",
+    clue: "Flip 1/4 to 4/1, then multiply: 1/2 × 4 = 2."
+  },
+  {
+    category: "fractions",
+    question: "11) Divide: 2/3 ÷ 1/6",
+    answer: "4",
+    clue: "Flip 1/6 to 6/1, then multiply: 2/3 × 6 = 12/3 = 4."
+  },
+  {
+    category: "fractions",
+    question: "12) What is 3 1/2 as an improper fraction?",
+    answer: "7/2",
+    clue: "Multiply whole: 3×2=6, then add numerator: 6+1 = 7 → 7/2."
+  },
+  {
+    category: "fractions",
+    question: "13) What is 9/4 as a mixed number?",
+    answer: "2 1/4",
+    clue: "Divide 9 by 4: 4 goes into 9 twice (2), remainder 1 → 2 1/4."
+  },
+  {
+    category: "fractions",
+    question: "14) Add: 2/5 + 1/2",
+    answer: "9/10",
+    clue: "Common denominator is 10: 2/5 = 4/10, 1/2 = 5/10 → 4+5 = 9/10."
+  },
+  {
+    category: "fractions",
+    question: "15) Subtract: 5/6 - 1/3",
+    answer: "1/2",
+    clue: "Convert 1/3 to 2/6 → 5/6 - 2/6 = 3/6 = 1/2."
+  },
+  {
+    category: "fractions",
+    question: "16) What is 1/4 of 20?",
+    answer: "5",
+    clue: "Multiply: 1/4 × 20 = 20 ÷ 4 = 5."
+  },
+  {
+    category: "fractions",
+    question: "17) What is 2/3 of 15?",
+    answer: "10",
+    clue: "Multiply: 2/3 × 15 = 30 ÷ 3 = 10."
+  },
+  {
+    category: "fractions",
+    question: "18) If you eat 3/8 of a pizza, how much is left?",
+    answer: "5/8",
+    clue: "1 - 3/8 = 5/8 left. Subtract eaten from the whole pizza."
+  },
+  {
+    category: "fractions",
+    question: "19) Which is bigger: 5/6 or 4/5?",
+    answer: "5/6",
+    clue: "Convert to same denominator: 25/30 vs 24/30 → 25/30 is bigger."
+  },
+  {
+    category: "fractions",
+    question: "20) Simplify: 10/15",
+    answer: "2/3",
+    clue: "Divide top and bottom by 5: 10 ÷ 5 = 2, 15 ÷ 5 = 3."
+  },
+  {
+    category: "fractions",
+    question: "21) What is 2 1/2 + 1 1/2?",
+    answer: "4",
+    clue: "Add wholes: 2 + 1 = 3; add fractions: 1/2 + 1/2 = 1 → 3 + 1 = 4."
+  },
+  {
+    category: "fractions",
+    question: "22) Multiply: 3/5 × 10",
+    answer: "6",
+    clue: "Write 10 as 10/1: 3×10 = 30, 5×1 = 5 → 30/5 = 6."
+  },
+  {
+    category: "fractions",
+    question: "23) What fraction of an hour is 15 minutes?",
+    answer: "1/4",
+    clue: "15 is one fourth of 60, since 60 ÷ 4 = 15."
+  },
+  {
+    category: "fractions",
+    question: "24) A recipe needs 2/3 cup of sugar. How much for half the recipe?",
+    answer: "1/3",
+    clue: "Half of 2/3 = 1/3, because 2/3 ÷ 2 = 1/3."
+  },
+  {
+    category: "fractions",
+    question: "25) What is 7/8 - 1/4?",
+    answer: "5/8",
+    clue: "Convert 1/4 to 2/8 → 7/8 - 2/8 = 5/8."
+  },
+  {
+    category: "algebra",
+    question: "1) Solve: x + 5 = 12",
+    answer: "7",
+    clue: "To isolate x, subtract 5 from both sides: 12 - 5 = 7."
+  },
+  {
+    category: "algebra",
+    question: "2) Solve: x - 3 = 10",
+    answer: "13",
+    clue: "Add 3 to both sides to get x alone: 10 + 3 = 13."
+  },
+  {
+    category: "algebra",
+    question: "3) Solve: 4x = 20",
+    answer: "5",
+    clue: "Divide both sides by 4: 20 ÷ 4 = 5. This isolates x."
+  },
+  {
+    category: "algebra",
+    question: "4) Solve: x / 3 = 7",
+    answer: "21",
+    clue: "Multiply both sides by 3 to cancel the denominator: x = 21."
+  },
+  {
+    category: "algebra",
+    question: "5) Solve: 2x + 6 = 14",
+    answer: "4",
+    clue: "First subtract 6: 14 - 6 = 8, then divide by 2: 8 ÷ 2 = 4."
+  },
+  {
+    category: "algebra",
+    question: "6) Solve: 3x - 4 = 11",
+    answer: "5",
+    clue: "Add 4 to get 15, then divide by 3: x = 15 ÷ 3 = 5."
+  },
+  {
+    category: "algebra",
+    question: "7) Solve: 5x + 2 = 3x + 10",
+    answer: "4",
+    clue: "Move 3x to the left (5x - 3x = 2x), then solve: 2x = 8 ⇒ x = 4."
+  },
+  {
+    category: "algebra",
+    question: "8) Solve: 2(x + 4) = 18",
+    answer: "5",
+    clue: "Distribute: 2x + 8 = 18, subtract 8: 2x = 10, divide: x = 5."
+  },
+  {
+    category: "algebra",
+    question: "9) Simplify: 3(x + 2) + 2x",
+    answer: "5x + 6",
+    clue: "Distribute: 3x + 6 + 2x = 5x + 6 after combining like terms."
+  },
+  {
+    category: "algebra",
+    question: "10) Solve: 6x - 4 = 2x + 8",
+    answer: "3",
+    clue: "Move 2x over: 4x = 12 ⇒ x = 3 after dividing both sides."
+  },
+  {
+    category: "algebra",
+    question: "11) Factor: x² + 5x + 6",
+    answer: "(x + 2)(x + 3)",
+    clue: "Look for two numbers that multiply to 6 and add to 5: 2 and 3."
+  },
+  {
+    category: "algebra",
+    question: "12) Factor: x² - 9",
+    answer: "(x + 3)(x - 3)",
+    clue: "This is a difference of squares: x² - 3² = (x + 3)(x - 3)."
+  },
+  {
+    category: "algebra",
+    question: "13) Expand: (x + 4)(x + 2)",
+    answer: "x² + 6x + 8",
+    clue: "Use FOIL: x*x + x*2 + 4*x + 4*2 = x² + 6x + 8."
+  },
+  {
+    category: "algebra",
+    question: "14) Solve: (x - 1)(x + 3) = 0",
+    answer: "-3 or 1",
+    clue: "Use the zero-product rule: set each factor equal to 0."
+  },
+  {
+    category: "algebra",
+    question: "15) Evaluate: 3x² when x = 2",
+    answer: "12",
+    clue: "Square first: 2² = 4, then multiply: 3 × 4 = 12."
+  },
+  {
+    category: "algebra",
+    question: "16) Evaluate: x² + 2x when x = -1",
+    answer: "1",
+    clue: "x² = 1, 2x = -2 ⇒ 1 + (-2) = -1."
+  },
+  {
+    category: "algebra",
+    question: "17) Solve: 4(x - 2) + 3 = 15",
+    answer: "4",
+    clue: "Distribute: 4x - 8 + 3 = 15 ⇒ 4x - 5 = 15 ⇒ x = 5."
+  },
+  {
+    category: "algebra",
+    question: "18) Solve: x/2 + 3 = 7",
+    answer: "8",
+    clue: "Subtract 3: x/2 = 4, then multiply both sides by 2."
+  },
+  {
+    category: "algebra",
+    question: "19) Solve: 2x/5 = 6",
+    answer: "15",
+    clue: "Multiply both sides by 5: 2x = 30 ⇒ x = 15."
+  },
+  {
+    category: "algebra",
+    question: "20) Solve: x² = 49",
+    answer: "7 or -7",
+    clue: "Both 7² and (-7)² equal 49. Take square root of both sides."
+  },
+  {
+    category: "algebra",
+    question: "21) Solve: 2x² = 18",
+    answer: "3 or -3",
+    clue: "Divide by 2: x² = 9 ⇒ x = ±3."
+  },
+  {
+    category: "algebra",
+    question: "22) Is x = 2 a solution to x² - 4 = 0?",
+    answer: "Yes",
+    clue: "Plug in: 2² = 4, so 4 - 4 = 0. It works!"
+  },
+  {
+    category: "algebra",
+    question: "23) Solve: x + 3 < 10",
+    answer: "x < 7",
+    clue: "Subtract 3 from both sides to isolate x."
+  },
+  {
+    category: "algebra",
+    question: "24) Solve: 4x + 1 ≥ 9",
+    answer: "x ≥ 2",
+    clue: "Subtract 1: 4x ≥ 8, then divide by 4."
+  },
+  {
+    category: "algebra",
+    question: "25) A number plus 5 is equal to 12. What is the number?",
+    answer: "7",
+    clue: "Translate to equation: x + 5 = 12 ⇒ x = 12 - 5 = 7."
+  }
+];
+
+
+
+    // Filtered questions for current galaxy
+    let currentQuestions = [];
+
+    // Start Adventure from galaxy choice
+    function startGalaxy(galaxy) {
+      selectedGalaxy = galaxy;
+      currentQuestions = questions.filter(q => q.category === galaxy);
+      currentLevel = 1;
+      score = 0;
+      backArrow.style.display = "block";
+      galaxiesDiv.style.display = "none";
+      answerSection.style.display = "block";
+      canvas.style.display = "block";
+      geoBot.style.display = "block";
+      badgeDisplay.textContent = "";
+      scoreBoard.textContent = `Score: ${score}`;
+      loadLevel();
+      document.getElementById("progressShip").style.left = "0px";
+      resetProgressBar();
+    }
+
+    // Load the current question and visual
+    function loadLevel() {
+      if (currentLevel > currentQuestions.length) {
+        h1.textContent = "🎉 Galaxy Restored!";
+        gameText.textContent = `Final Score: ${score}`;
+        canvas.style.display = "none";
+        geoBotMsg.style.display = "none";
+        answerSection.style.display = "none";
+        displayBadge();
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      geoBotMsg.style.display = "none";
+      answerInput.value = "";
+      answerSection.style.display = "block";
+
+      const q = currentQuestions[currentLevel - 1];
+      h1.textContent = `🌠 ${capitalizeFirstLetter(selectedGalaxy)} Galaxy - Planet ${currentLevel}`;
+      gameText.textContent = q.question;
+      scoreBoard.textContent = `Score: ${score}`;
+
+      // Draw visual based on galaxy category
+      if (selectedGalaxy === "fractions") {
+        drawFractionPie(q.question);
+      } else if (selectedGalaxy === "algebra") {
+        drawVault(q.question);
+      } else if (selectedGalaxy === "geometry") {
+        drawShape(q.question);
+      }
+    }
+
+    // Draw fraction pie chart visual
+    function drawFractionPie(question) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const radius = 100;
+
+  // Parse fractions from the question text (simple regex to find fractions like 1/2, 3/4 etc)
+  const fractionMatches = question.match(/\d+\/\d+/g);
+  if (!fractionMatches || fractionMatches.length === 0) {
+    // No fractions found, draw a simple full pie
+    ctx.fillStyle = "#00ffcc";
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.fillStyle = "white";
+    ctx.font = "18px Arial";
+    ctx.fillText("Fraction Pie", centerX - 50, centerY + radius + 30);
+    return;
+  }
+
+  // Convert fractions to decimals for drawing slices
+  let fractions = fractionMatches.map(fracStr => {
+    const [num, denom] = fracStr.split("/").map(Number);
+    return num / denom;
+  });
+
+  // Calculate sum of fractions to normalize if necessary (like 3/4 + 1/4 = 1)
+  let total = fractions.reduce((a, b) => a + b, 0);
+  if (total > 1) total = 1; // cap at full pie
+
+  // Colors for slices
+  const colors = ["#00ffcc", "#ff6666", "#ffcc00", "#66ff66", "#9966ff"];
+
+  let startAngle = 0;
+
+  for (let i = 0; i < fractions.length; i++) {
+    let sliceAngle = fractions[i] / total * 2 * Math.PI;
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    startAngle += sliceAngle;
+  }
+
+  // Draw circle outline
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  ctx.fillStyle = "white";
+  ctx.font = "18px Arial";
+  ctx.fillText("Fraction Pie", centerX - 50, centerY + radius + 30);
+}
+    // Draw algebra vault visual
+    function drawVault(question) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Draw vault box
+  ctx.fillStyle = "#0066cc";
+  ctx.strokeStyle = "#00ffcc";
+  ctx.lineWidth = 5;
+  ctx.fillRect(centerX - 150, centerY - 100, 300, 200);
+  ctx.strokeRect(centerX - 150, centerY - 100, 300, 200);
+
+  // Draw lock circle
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+  ctx.fillStyle = "#003366";
+  ctx.fill();
+  ctx.stroke();
+
+  // Draw keyhole rectangle
+  ctx.fillStyle = "#00ffcc";
+  ctx.fillRect(centerX - 10, centerY - 20, 20, 40);
+
+  // Draw variable x and equation text
+  ctx.fillStyle = "white";
+  ctx.font = "bold 72px Arial";
+  ctx.fillText("x", centerX - 18, centerY + 25);
+
+  ctx.font = "22px Arial";
+  ctx.fillText(question, centerX - 140, centerY + 100);
+}
+
+    // Draw geometry shape visual
+    function drawShape(question) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      ctx.strokeStyle = "#00ffcc";
+      ctx.lineWidth = 5;
+      ctx.fillStyle = "#004466";
+
+      if (question.toLowerCase().includes("triangle")) {
+        // Draw triangle
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - 100);
+        ctx.lineTo(centerX - 100, centerY + 100);
+        ctx.lineTo(centerX + 100, centerY + 100);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Triangle", centerX - 40, centerY + 130);
+      } else if (question.toLowerCase().includes("square")) {
+        // Draw square
+        ctx.fillRect(centerX - 100, centerY - 100, 200, 200);
+        ctx.strokeRect(centerX - 100, centerY - 100, 200, 200);
+
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Square", centerX - 30, centerY + 130);
+      } else if (question.toLowerCase().includes("circle")) {
+        // Draw circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 100, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Circle", centerX - 30, centerY + 130);
+      } else if (question.toLowerCase().includes("pentagon")) {
+        drawPolygon(centerX, centerY, 5, 100);
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Pentagon", centerX - 40, centerY + 130);
+      } else if (question.toLowerCase().includes("hexagon")) {
+        drawPolygon(centerX, centerY, 6, 100);
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Hexagon", centerX - 40, centerY + 130);
+      } else {
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Geometry Shape", centerX - 60, centerY);
+      }
+    }
+
+    function drawPolygon(cx, cy, sides, radius) {
+      const angle = (2 * Math.PI) / sides;
+      ctx.beginPath();
+      for (let i = 0; i < sides; i++) {
+        const x = cx + radius * Math.cos(i * angle - Math.PI / 2);
+        const y = cy + radius * Math.sin(i * angle - Math.PI / 2);
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Handle answer submission
+    submitAnswerBtn.onclick = () => {
+      const userAnswerRaw = answerInput.value.trim().toLowerCase();
+      if (!userAnswerRaw) {
+        alert("Please enter your answer.");
+        return;
+      }
+
+      const currentQ = currentQuestions[currentLevel - 1];
+      const correctAnswer = currentQ.answer.toLowerCase();
+
+      // Normalize some fraction answers for comparison
+      if (selectedGalaxy === "fractions") {
+        const normalizeFraction = (str) => str.replace(/\s/g, '').replace(/1\/1/, '1');
+        if (normalizeFraction(userAnswerRaw) === normalizeFraction(correctAnswer)) {
+          correctAnswerGiven();
+        } else {
+          wrongAnswerGiven();
+        }
+      } else {
+        if (userAnswerRaw === correctAnswer) {
+          correctAnswerGiven();
+        } else {
+          wrongAnswerGiven();
+        }
+      }
+    };
+
+function correctAnswerGiven() {
+  score++;
+  scoreBoard.textContent = `Score: ${score}`;
+  geoBotMsg.style.display = "block";
+  geoBotMsg.textContent = "🌟 Correct! The galaxy shines brighter!";
+  applause.play();
+
+  updateProgressBar(); // Move ship forward
+
+  currentLevel++;
+  setTimeout(() => {
+    geoBotMsg.style.display = "none";
+    loadLevel();
+  }, 2500);
+}
+
+
+    // On wrong answer
+    function wrongAnswerGiven() {
+      geoBotMsg.style.display = "block";
+      const currentQ = currentQuestions[currentLevel - 1];
+      geoBotMsg.textContent = `❌ Try again! Hint: ${currentQ.clue}`;
+      setTimeout(() => {
+        geoBotMsg.style.display = "none";
+      }, 4000);
+    }
+
+    // Back arrow to return to galaxy select
+    backArrow.onclick = () => {
+      selectedGalaxy = null;
+      currentQuestions = [];
+      currentLevel = 1;
+      score = 0;
+      backArrow.style.display = "none";
+      galaxiesDiv.style.display = "flex";
+      answerSection.style.display = "none";
+      canvas.style.display = "none";
+      geoBot.style.display = "none";
+      geoBotMsg.style.display = "none";
+      h1.textContent = "🌌 Welcome to Math Galaxy";
+      gameText.textContent = "Restore the galaxy by solving math mysteries!";
+      scoreBoard.textContent = `Score: 0`;
+      badgeDisplay.textContent = "";
+    };
+
+    // Galaxy button event listeners
+    document.querySelectorAll(".galaxy-button").forEach(button => {
+      button.addEventListener("click", () => {
+        startGalaxy(button.dataset.galaxy);
+      });
+    });
+
+    // GeoBot messages on click
+geoBot.onclick = () => {
+  if (selectedGalaxy && currentLevel <= currentQuestions.length) {
+    const currentQ = currentQuestions[currentLevel - 1];
+    geoBotMsg.style.display = "block";
+    geoBotMsg.textContent = `💡 Hint: ${currentQ.clue}`;
+    setTimeout(() => {
+      geoBotMsg.style.display = "none";
+    }, 5000);
+  }
+};
+
+    // Badge awarding based on score (example)
+    function displayBadge() {
+      let badgeText = "";
+      if (score >= 8) badgeText = "🏅 Math Master Badge!";
+      else if (score >= 5) badgeText = "🎖️ Math Star Badge!";
+      else badgeText = "👍 Keep Practicing!";
+      badgeDisplay.textContent = badgeText;
+    }
+
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+
+
+document.getElementById("startGameBtn").addEventListener("click", () => {
+  const spacecraft = document.getElementById("spacecraft");
+  spacecraft.classList.add("lift-off");
+
+  // Wait for animation before removing intro screen
+  setTimeout(() => {
+    document.getElementById("intro-scene").style.display = "none";
+  }, 2500);
+});
+
+const clickSound = document.getElementById("click-sound");
+
+document.querySelectorAll("button").forEach(button => {
+  button.addEventListener("click", () => {
+    clickSound.currentTime = 0;
+    clickSound.play();
+  });
+});
+
+
+function generateStars(count) {
+  const starfield = document.getElementById("starfield");
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement("div");
+    star.classList.add("star");
+    star.style.top = `${Math.random() * 100}%`;
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.animationDuration = `${1 + Math.random() * 2}s`;
+    star.style.opacity = Math.random();
+    starfield.appendChild(star);
+  }
+}
+generateStars(200);
+
+
+
+function fadeOutMusic() {
+  const fadeAudio = setInterval(() => {
+    if (bgMusic.volume > 0.1) {
+      bgMusic.volume -= 0.1;
+    } else {
+      bgMusic.pause();
+      clearInterval(fadeAudio);
+    }
+  }, 200);
+}
+
+function displayBadge() {
+  let badgeText = "";
+  if (score >= 80) badgeText = "🏅 Math Master Badge!";
+  else if (score >= 50) badgeText = "🎖️ Math Star Badge!";
+  else badgeText = "👍 Keep Practicing!";
+  badgeDisplay.textContent = badgeText;
+
+  fadeOutMusic(); // fade out music when game ends
+}
+
+
+
+// --- LOGIN ---
+const loginScreen = document.getElementById("login-screen");
+const loginBtn = document.getElementById("loginBtn");
+const cadetInput = document.getElementById("cadetName");
+const cadetProfile = document.getElementById("cadet-profile");
+const cadetDisplayName = document.getElementById("cadetDisplayName");
+const profilePopup = document.getElementById("profile-popup");
+const logoutBtn = document.getElementById("logoutBtn");
+
+loginBtn.onclick = () => {
+  const name = cadetInput.value.trim();
+  if (!name) {
+    alert("Please enter your name!");
+    return;
+  }
+  localStorage.setItem("cadetName", name);
+  cadetDisplayName.textContent = `👨‍🚀 ${name}`;
+  cadetProfile.style.display = "block";
+  loginScreen.style.display = "none";
+};
+
+// Profile popup toggle
+cadetProfile.onclick = () => {
+  profilePopup.style.display = profilePopup.style.display === "block" ? "none" : "block";
+};
+
+logoutBtn.onclick = () => {
+  localStorage.removeItem("cadetName");
+  location.reload();
+};
+
+// Auto-login if name is saved
+window.addEventListener("DOMContentLoaded", () => {
+  const savedName = localStorage.getItem("cadetName");
+  if (savedName) {
+    cadetDisplayName.textContent = `👨‍🚀 ${savedName}`;
+    cadetProfile.style.display = "block";
+    loginScreen.style.display = "none";
+  }
+});
+
+// Handle login button click
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const cadetName = document.getElementById("cadetName").value.trim();
+  if (cadetName === "") {
+    alert("Please enter your name.");
+    return;
+  }
+
+  // Save cadet name for display
+  document.getElementById("cadetDisplayName").textContent = `👨‍🚀 Cadet ${cadetName}`;
+
+  // Hide login screen
+  document.getElementById("login-screen").style.display = "none";
+
+  // Show profile icon
+  document.getElementById("cadet-profile").style.display = "block";
+
+  // Optionally, show intro screen if hidden
+  document.getElementById("intro-scene").style.display = "flex";
+});
+
+function updateProgressBar() {
+  const ship = document.getElementById("progressShip");
+  const fill = document.getElementById("progressFill");
+  const container = document.getElementById("progressBar");
+
+  const totalQuestions = currentQuestions.length;
+  const progressPercent = (score / totalQuestions) * 100;
+
+  const maxMove = container.offsetWidth - ship.offsetWidth;
+  const shipPosition = (progressPercent / 100) * maxMove;
+
+  // Move the ship
+  ship.style.left = `${shipPosition}px`;
+
+  // Set fill width to just past the ship center
+  fill.style.width = `${shipPosition + ship.offsetWidth / 2}px`;
+}
+
+
+document.getElementById("progressShip").style.left = "0px";
+
+
+
+function resetProgressBar() {
+  const ship = document.getElementById("progressShip");
+  const fill = document.getElementById("progressFill");
+
+  // Reset fill width and ship position
+  fill.style.width = '0px';
+  ship.style.left = '0px';
+}
+
+  </script>
+</body>
+</html>
